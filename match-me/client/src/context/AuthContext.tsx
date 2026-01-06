@@ -4,6 +4,7 @@ import axios from 'axios';
 interface User {
     id: number;
     email: string;
+    avatar_url?: string;
 }
 
 interface AuthContextType {
@@ -12,6 +13,7 @@ interface AuthContextType {
     login: (token: string, user: User) => void;
     logout: () => void;
     isAuthenticated: boolean;
+    refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -20,17 +22,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [user, setUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
 
-    useEffect(() => {
+    const fetchUser = async () => {
         if (token) {
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-            // Verify token or fetch me?
-            axios.get('http://localhost:3000/me')
-                .then(res => setUser(res.data.user))
-                .catch(() => logout());
-        } else {
-            delete axios.defaults.headers.common['Authorization'];
+            try {
+                const res = await axios.get('http://localhost:3000/me');
+                // Merge user table data and profile data
+                setUser({
+                    ...res.data.user,
+                    avatar_url: res.data.profile?.avatar_url || ''
+                });
+            } catch (err) {
+                logout();
+            }
         }
+    };
+
+    useEffect(() => {
+        fetchUser();
     }, [token]);
+
+    const refreshUser = async () => { // Exposed helper to refresh profile without reload
+        await fetchUser();
+    };
 
     const login = (newToken: string, newUser: User) => {
         localStorage.setItem('token', newToken);
@@ -45,7 +59,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!user }}>
+        <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!user, refreshUser }}>
             {children}
         </AuthContext.Provider>
     );

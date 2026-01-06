@@ -8,6 +8,7 @@ import Profile from './pages/Profile';
 import Connections from './pages/Connections';
 import ChatList from './pages/ChatList';
 import ChatWindow from './pages/ChatWindow';
+import UserProfile from './pages/UserProfile';
 
 // Placeholder components until created
 const Layout = ({ children }: { children: React.ReactNode }) => {
@@ -28,7 +29,23 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <a href="/connections">Connections</a>
           <a href="/chats">Chats</a>
           <a href="/profile">Profile</a>
-          <span style={{ marginLeft: '20px' }}>Hello, {user?.email}</span>
+
+
+          {user?.avatar_url && (
+            <img
+              src={user.avatar_url}
+              alt="Avatar"
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                marginLeft: '15px',
+                border: '1px solid #ccc'
+              }}
+            />
+          )}
+
           <button onClick={logout} style={{ marginLeft: '10px', padding: '5px 10px' }}>Logout</button>
         </div>
       </nav>
@@ -61,6 +78,7 @@ function App() {
           <Route path="/connections" element={<PrivateRoute><Connections /></PrivateRoute>} />
           <Route path="/chats" element={<PrivateRoute><ChatList /></PrivateRoute>} />
           <Route path="/chats/:id" element={<PrivateRoute><ChatWindow /></PrivateRoute>} />
+          <Route path="/users/:id" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
         </Routes>
       </Router>
     </AuthProvider>
