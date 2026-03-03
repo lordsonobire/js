@@ -1,0 +1,359 @@
+/* ═══════════════════════════════════════════════════
+   FRONT DESK — Glass Management Dashboard
+   ═══════════════════════════════════════════════════ */
+
+:root {
+    --glass-bg: rgba(255, 255, 255, 0.04);
+    --glass-bg-hover: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-border-hover: rgba(255, 255, 255, 0.15);
+    --glass-blur: 20px;
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+    --primary: #38bdf8;
+    --primary-glow: rgba(56, 189, 248, 0.25);
+    --danger: #ef4444;
+    --success: #10b981;
+    --text-main: rgba(255, 255, 255, 0.92);
+    --text-muted: rgba(255, 255, 255, 0.5);
+
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --transition-fast: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    --transition-normal: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 40px 20px;
+    background: #080818;
+    background-image:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(56, 189, 248, 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 90%, rgba(168, 85, 247, 0.06) 0%, transparent 60%);
+    color: var(--text-main);
+    min-height: 100vh;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(circle 500px at 30% 20%, rgba(56, 189, 248, 0.04) 0%, transparent 100%),
+        radial-gradient(circle 400px at 70% 80%, rgba(168, 85, 247, 0.03) 0%, transparent 100%);
+    animation: ambientShift 25s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes ambientShift {
+    0%   { opacity: 1; transform: scale(1); }
+    50%  { opacity: 0.6; transform: scale(1.05); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+.container {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* ── Title ──────────────────────────────────────── */
+h1 {
+    font-family: 'Exo 2', sans-serif;
+    text-align: center;
+    margin-bottom: 40px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, var(--primary), #a855f7, #fff);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientText 6s ease infinite;
+}
+
+@keyframes gradientText {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+h1 i {
+    color: var(--primary);
+    margin-right: 10px;
+}
+
+/* ── Glass Card ─────────────────────────────────── */
+.card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border-radius: 20px;
+    box-shadow: var(--glass-shadow);
+    margin-bottom: 30px;
+    overflow: hidden;
+    border: 1px solid var(--glass-border);
+    transition: all var(--transition-normal);
+}
+
+.card:hover {
+    border-color: var(--glass-border-hover);
+}
+
+.card-header {
+    background: rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--primary);
+    padding: 20px 25px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-bottom: 1px solid var(--glass-border);
+    font-family: 'Exo 2', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.card-body {
+    padding: 25px;
+}
+
+/* ── Forms & Inputs ─────────────────────────────── */
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    letter-spacing: 0.02em;
+}
+
+input[type="text"],
+input[type="number"] {
+    width: 100%;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    color: white;
+    font-size: 1rem;
+    transition: all var(--transition-fast);
+    font-family: 'Inter', sans-serif;
+    box-sizing: border-box;
+    outline: none;
+}
+
+input:focus {
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15), 0 0 20px rgba(56, 189, 248, 0.1);
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.25);
+}
+
+/* ── Buttons ────────────────────────────────────── */
+button {
+    padding: 12px 24px;
+    background: linear-gradient(135deg, var(--primary), #0ea5e9);
+    color: white;
+    border: none;
+    border-radius: 9999px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all var(--transition-fast);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px var(--primary-glow);
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px var(--primary-glow), 0 0 30px rgba(56, 189, 248, 0.15);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+form button[type="submit"] {
+    width: 100%;
+}
+
+/* ── Race List Items ────────────────────────────── */
+.race-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    margin-bottom: 12px;
+    transition: all var(--transition-fast);
+}
+
+.race-item:hover {
+    background: var(--glass-bg-hover);
+    border-color: rgba(56, 189, 248, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    transform: translateX(4px);
+}
+
+.race-info h3 {
+    margin: 0 0 5px 0;
+    color: var(--text-main);
+    font-family: 'Exo 2', sans-serif;
+}
+
+.race-info p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.85em;
+}
+
+/* ── Action Buttons ─────────────────────────────── */
+.race-actions, .driver-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.manage-btn, .edit-driver-btn {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    border-radius: 9999px;
+    box-shadow: none;
+}
+
+.manage-btn:hover, .edit-driver-btn:hover {
+    background: var(--glass-bg-hover);
+    border-color: var(--glass-border-hover);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.delete-btn, .delete-driver-btn {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: var(--danger);
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    border-radius: 9999px;
+    box-shadow: none;
+}
+
+.delete-btn:hover, .delete-driver-btn:hover {
+    background: linear-gradient(135deg, var(--danger), #dc2626);
+    border-color: var(--danger);
+    color: white;
+    box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3);
+}
+
+/* ── Drivers List ───────────────────────────────── */
+.drivers-list {
+    margin: 20px 0;
+}
+
+.driver-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--glass-border);
+    transition: background var(--transition-fast);
+}
+
+.driver-item:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.driver-item:last-child {
+    border-bottom: none;
+}
+
+.driver-info strong {
+    color: var(--primary);
+    font-family: 'Exo 2', sans-serif;
+}
+
+.no-races, .no-drivers {
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 30px 0;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    border: 1px dashed var(--glass-border);
+}
+
+/* ── Selected Race Name ─────────────────────────── */
+#selectedRaceName {
+    margin-top: 0;
+    background: linear-gradient(135deg, var(--primary), #a855f7);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.button-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+#cancelEditBtn {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-muted);
+    box-shadow: none;
+}
+
+#cancelEditBtn:hover {
+    background: var(--glass-bg-hover);
+    border-color: var(--glass-border-hover);
+    color: white;
+}
+
+/* ── Responsive ─────────────────────────────────── */
+@media (max-width: 600px) {
+    .race-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    .race-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+/* ── Scrollbar ──────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+
+::selection {
+    background: rgba(56, 189, 248, 0.3);
+    color: white;
+}

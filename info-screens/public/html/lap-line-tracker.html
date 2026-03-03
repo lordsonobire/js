@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Lap Line Tracker</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@700;900&family=Inter:wght@400;600&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/lap-line-tracker.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <a href="/" class="back-link"><i class="fa-solid fa-arrow-left"></i> Home</a>
+  <header>
+    <div class="header-content">
+      <h1>Lap Line Tracker</h1>
+      <div id="race-name" class="race-name">Waiting for race data...</div>
+    </div>
+    
+    <div class="race-time-display">
+      <span class="time-label">REMAINING</span>
+      <span id="race-time-remaining">00:00</span>
+    </div>
+  </header>
+
+  <div id="race-end-notification">
+    <div class="notification-content">
+      RACE SESSION ENDED
+    </div>
+  </div>
+
+  <div id="message"></div>
+
+  <div id="lap-buttons">
+    <p class="loading-text">Waiting for active cars...</p>
+  </div>
+
+  <script src="/js/utils.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/lap-line-tracker.js"></script>
+</body>
+</html>

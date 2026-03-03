@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Front Desk</title>
+    
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/front-desk.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <a href="/" class="back-link"><i class="fa-solid fa-arrow-left"></i> Home</a>
+    <div class="container">
+        <h1><i class="fa-solid fa-flag-checkered"></i> Race Management</h1>
+
+        <div class="card">
+            <div class="card-header"><i class="fa-solid fa-list-ul"></i> Upcoming Races</div>
+            <div class="card-body">
+                <div id="races-list" class="races-list">
+                    <div class="no-races">Loading races...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><i class="fa-solid fa-plus-circle"></i> Add New Race</div>
+            <div class="card-body">
+                <form id="raceForm">
+                    <label for="raceName">Race Name</label>
+                    <input type="text" id="raceName" name="raceName" placeholder="e.g., Grand Prix Final" required>
+                    <button type="submit">Create Race</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card" id="driversCard" style="display: none;">
+            <div class="card-header"><i class="fa-solid fa-users-gear"></i> Manage Drivers</div>
+            <div class="card-body">
+                <h3 id="selectedRaceName"></h3>
+                
+                <div id="driversList" class="drivers-list">
+                    <div class="no-drivers">No drivers added yet</div>
+                </div>
+
+                <form id="driverForm">
+                    <input type="hidden" id="driverId" value="">
+                    
+                    <label for="driverName">Driver Name</label>
+                    <input type="text" id="driverName" placeholder="e.g., Max Verstappen" required>
+                    
+                    <label for="carNumber">Car Number</label>
+                    <input type="number" id="carNumber" placeholder="e.g., 1" required min="1">
+                    
+                    <div class="button-group">
+                        <button type="submit" id="addDriverBtn">Add Driver</button>
+                        <button type="button" id="cancelEditBtn" style="display: none;">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/utils.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            async function verifyAccess() {
+                const accessCode = prompt('Enter access code for Front desk:');
+                if (!accessCode) {
+                    alert('Access code required');
+                    window.location.href = '/';
+                    return false;
+                }
+
+                try {
+                    const response = await fetch('/api/verify-access', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ page: 'front-desk', accessCode })
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        return true;
+                    } else {
+                        alert(result.message || 'Invalid access code');
+                        return await verifyAccess(); // Recursive retry
+                    }
+                } catch (error) {
+                    console.error('Access verification error:', error);
+                    alert('Error verifying access');
+                    window.location.href = '/';
+                    return false;
+                }
+            }
+
+            const granted = await verifyAccess();
+            if (granted) {
+                initializeRaceControl();
+            }
+        });
+
+        function initializeRaceControl() {
+            const socket = io();
+            let selectedRaceId = null;
+            let races = [];
+
+            // Load races on page load
+            socket.emit('get-races', {}, (response) => {
+                if (response.success) {
+                    races = response.races;
+                    updateRacesList();
+                }
+            });
+
+            // Listen for race updates
+            socket.on('races-update', (updatedRaces) => {
+                races = updatedRaces;
+                updateRacesList();
+
+                // If we have a selected race, update its drivers
+                if (selectedRaceId) {
+                    const selectedRace = races.find(race => race.id === selectedRaceId);
+                    if (selectedRace) {
+                        updateDriversList(selectedRace);
+                    }
+                }
+            });
+
+            // Add new race
+            document.getElementById('raceForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('raceName').value;
+                socket.emit('create-race', { name }, (response) => {
+                    if (response.success) {
+                        document.getElementById('raceName').value = '';
+                    } else {
+                        alert(response.message);
+                    }
+                });
+            });
+
+            // Add/Edit driver
+            document.getElementById('driverForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const driverName = document.getElementById('driverName').value;
+                const carNumber = document.getElementById('carNumber').value;
+                const driverId = document.getElementById('driverId').value;
+
+                if (!selectedRaceId) return;
+
+                const data = {
+                    raceId: selectedRaceId,
+                    name: driverName,
+                    carNumber: parseInt(carNumber)
+                };
+
+                // If we have a driver ID, we're editing
+                if (driverId) {
+                    data.driverId = driverId;
+                    socket.emit('update-driver', data, handleDriverResponse);
+                } else {
+                    socket.emit('add-driver', data, handleDriverResponse);
+                }
+            });
+
+            // Cancel edit
+            document.getElementById('cancelEditBtn').addEventListener('click', () => {
+                resetDriverForm();
+            });
+
+            function handleDriverResponse(response) {
+                if (response.success) {
+                    resetDriverForm();
+                } else {
+                    alert(response.message);
+                }
+            }
+
+            function resetDriverForm() {
+                document.getElementById('driverName').value = '';
+                document.getElementById('carNumber').value = '';
+                document.getElementById('driverId').value = '';
+                document.getElementById('addDriverBtn').textContent = 'Add Driver';
+                document.getElementById('cancelEditBtn').style.display = 'none';
+            }
+
+            function updateRacesList() {
+                const racesList = document.getElementById('races-list');
+                racesList.innerHTML = '';
+
+                // Filter to show only PENDING races
+                const upcomingRaces = races.filter(race => race.state === 'PENDING');
+
+                if (upcomingRaces.length === 0) {
+                    racesList.innerHTML = '<div class="no-races">No upcoming races</div>';
+                    return;
+                }
+
+                upcomingRaces.forEach(race => {
+                    const raceItem = document.createElement('div');
+                    raceItem.className = 'race-item';
+                    raceItem.innerHTML = `
+                <div class="race-info">
+                    <h3>${escapeHTML(race.name)}</h3>
+                    <p>Status: ${escapeHTML(race.state)}</p>
+                    <p>Drivers: ${race.drivers.length}</p>
+                </div>
+                <div class="race-actions">
+                    <button class="manage-btn" data-id="${race.id}"><i class="fa-solid fa-user-pen"></i> Manage</button>
+                    <button class="delete-btn" data-id="${race.id}"><i class="fa-solid fa-trash"></i> Delete</button>
+                </div>
+            `;
+                    racesList.appendChild(raceItem);
+                });
+
+                // Add event listeners to buttons
+                document.querySelectorAll('.manage-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const target = e.target.closest('.manage-btn');
+                        const raceId = target.getAttribute('data-id');
+                        selectRace(raceId);
+                    });
+                });
+
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const target = e.target.closest('.delete-btn');
+                        if (confirm('Are you sure you want to delete this race?')) {
+                            const raceId = target.getAttribute('data-id');
+                            socket.emit('delete-race', { raceId: raceId }, (response) => {
+                                if (!response.success) {
+                                    alert(response.message);
+                                }
+                            });
+                        }
+                    });
+                });
+            }
+
+            function selectRace(raceId) {
+                selectedRaceId = raceId;
+                const race = races.find(r => r.id.toString() === raceId.toString());
+                if (!race) return;
+
+                document.getElementById('selectedRaceName').textContent = race.name;
+                document.getElementById('driversCard').style.display = 'block';
+                document.getElementById('driversCard').scrollIntoView({ behavior: 'smooth' });
+                resetDriverForm();
+                updateDriversList(race);
+            }
+
+            function updateDriversList(race) {
+    const driversList = document.getElementById('driversList');
+    driversList.innerHTML = '';
+
+    // Check if race has started
+    const raceStarted = race.state !== 'PENDING';
+    const driverForm = document.getElementById('driverForm');
+    const formInputs = driverForm.querySelectorAll('input, button');
+
+    if (raceStarted) {
+        formInputs.forEach(input => input.disabled = true);
+        if (!document.getElementById('race-started-warning')) {
+            const warning = document.createElement('div');
+            warning.id = 'race-started-warning';
+            warning.style.cssText = 'background: #ef4444; color: white; padding: 10px; border-radius: 6px; margin-bottom: 15px; text-align: center; font-weight: 600;';
+            warning.textContent = '⚠️ Race has started - Driver management is locked';
+            driverForm.parentElement.insertBefore(warning, driverForm);
+        }
+    } else {
+        formInputs.forEach(input => input.disabled = false);
+        const warning = document.getElementById('race-started-warning');
+        if (warning) warning.remove();
+    }
+
+    if (race.drivers.length === 0) {
+        driversList.innerHTML = '<div class="no-drivers">No drivers added yet</div>';
+        return;
+    }
+
+    race.drivers.forEach(driver => {
+        const driverItem = document.createElement('div');
+        driverItem.className = 'driver-item';
+
+        // Conditionally render edit/delete buttons based on race state
+        const actionButtons = raceStarted ? '' : `
+                        <button class="edit-driver-btn" data-id="${driver.id}"><i class="fa-solid fa-pen"></i></button>
+                        <button class="delete-driver-btn" data-id="${driver.id}"><i class="fa-solid fa-xmark"></i></button>
+                    `;
+
+        driverItem.innerHTML = `
+                    <div class="driver-info">
+                        <p><strong>${escapeHTML(driver.name)}</strong> - Car #${escapeHTML(driver.carNumber)}</p>
+                    </div>
+                    <div class="driver-actions">
+                        ${actionButtons}
+                    </div>
+                `;
+        driversList.appendChild(driverItem);
+    });
+
+    // Only add event listeners if race hasn't started
+    if (!raceStarted) {
+        document.querySelectorAll('.edit-driver-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const target = e.target.closest('.edit-driver-btn');
+                const driverId = target.getAttribute('data-id');
+                editDriver(race, driverId);
+            });
+        });
+
+        document.querySelectorAll('.delete-driver-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const target = e.target.closest('.delete-driver-btn');
+                if (confirm('Are you sure you want to delete this driver?')) {
+                    const driverId = target.getAttribute('data-id');
+                    socket.emit('delete-driver', {
+                        raceId: race.id,
+                        driverId: driverId
+                    }, (response) => {
+                        if (!response.success) {
+                            alert(response.message);
+                        }
+                    });
+                }
+            });
+        });
+    }
+}
+
+
+            function editDriver(race, driverId) {
+                const driver = race.drivers.find(d => d.id === driverId);
+                if (!driver) return;
+
+                document.getElementById('driverName').value = driver.name;
+                document.getElementById('carNumber').value = driver.carNumber;
+                document.getElementById('driverId').value = driver.id;
+                document.getElementById('addDriverBtn').textContent = 'Update Driver';
+                document.getElementById('cancelEditBtn').style.display = 'inline-block';
+                document.getElementById('driverName').focus();
+            }
+        }
+    </script>
+</body>
+</html>

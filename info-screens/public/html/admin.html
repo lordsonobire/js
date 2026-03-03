@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head></head>
+    <title>Hello!</title>
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <h1>Set Race Flag</h1>
+    <div class="flag-buttons">
+        <button class="flag-btn red" onclick="flag('green')">Safe</button>
+        <button class="flag-btn green" onclick="flag('yellow')">Hazard</button>
+        <button class="flag-btn yellow" onclick="flag('red')">Danger</button>
+        <button class="flag-btn finish" onclick="flag('finish')">Finish</button>
+    </div>
+</body>
+</html>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+
+    function flag(color) {
+        socket.emit('flag', { flag: color });
+    }
+</script>

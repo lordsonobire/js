@@ -1,0 +1,286 @@
+/* ═══════════════════════════════════════════════════
+   INFO-SCREENS — Premium Glass Racing Theme
+   Shared base for: race-control, next-race, flag,
+   race-countdown screens
+   ═══════════════════════════════════════════════════ */
+
+:root {
+    /* Glass layers */
+    --glass-bg: rgba(255, 255, 255, 0.04);
+    --glass-bg-hover: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-border-hover: rgba(255, 255, 255, 0.15);
+    --glass-blur: 20px;
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    --glass-shadow-elevated: 0 16px 48px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+    /* Racing palette */
+    --accent-green: #10b981;
+    --accent-red: #ef4444;
+    --accent-yellow: #f59e0b;
+    --accent-blue: #38bdf8;
+    --accent-purple: #a855f7;
+    --accent-white: #ffffff;
+
+    /* Text */
+    --text-main: rgba(255, 255, 255, 0.92);
+    --text-muted: rgba(255, 255, 255, 0.5);
+
+    /* Transitions */
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --transition-fast: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    --transition-normal: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body {
+    background: #080818;
+    background-image:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(56, 189, 248, 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 90%, rgba(168, 85, 247, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 50% 50%, rgba(16, 185, 129, 0.04) 0%, transparent 60%);
+    color: var(--text-main);
+    font-family: 'Exo 2', 'Inter', sans-serif;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(circle 500px at 25% 25%, rgba(56, 189, 248, 0.05) 0%, transparent 100%),
+        radial-gradient(circle 400px at 75% 75%, rgba(168, 85, 247, 0.04) 0%, transparent 100%);
+    animation: ambientShift 25s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes ambientShift {
+    0%   { opacity: 1; transform: scale(1); }
+    50%  { opacity: 0.6; transform: scale(1.08); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+h1 {
+    position: relative;
+    z-index: 1;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-weight: 800;
+    margin-bottom: 30px;
+    text-align: center;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple), var(--accent-white));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 2.5rem;
+    animation: gradientText 6s ease infinite;
+}
+
+@keyframes gradientText {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* ── Glass Section Panel ────────────────────────── */
+section {
+    position: relative;
+    z-index: 1;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border-radius: 20px;
+    padding: 25px;
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 20px;
+    box-shadow: var(--glass-shadow);
+    border: 1px solid var(--glass-border);
+    transition: all var(--transition-normal);
+}
+
+section:hover {
+    border-color: var(--glass-border-hover);
+    box-shadow: var(--glass-shadow-elevated);
+}
+
+.race-info {
+    color: var(--accent-green);
+    font-size: 1.2em;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.race-status {
+    color: var(--accent-blue);
+    font-size: 1.1em;
+    margin: 8px 0;
+}
+
+#noRacesMsg {
+    color: var(--accent-yellow);
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: center;
+}
+
+h2, h3, h4 {
+    color: var(--text-main);
+    margin-top: 0;
+    letter-spacing: 0.02em;
+}
+
+/* ── Active State Indicator ─────────────────────── */
+.active-state {
+    background: linear-gradient(135deg, var(--accent-green), #059669) !important;
+    color: #fff !important;
+    border: 2px solid rgba(16, 185, 129, 0.5) !important;
+    box-shadow: 0 0 25px rgba(16, 185, 129, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* ── Back Link (floating nav) ───────────────────── */
+.back-link {
+    position: fixed;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    text-decoration: none;
+    padding: 8px 20px;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    transition: all var(--transition-fast);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.back-link:hover {
+    background: rgba(56, 189, 248, 0.15);
+    border-color: rgba(56, 189, 248, 0.3);
+    box-shadow: 0 4px 20px rgba(56, 189, 248, 0.2);
+    color: var(--accent-blue);
+}
+
+/* ── Buttons ────────────────────────────────────── */
+button {
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-family: 'Exo 2', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+.flag-btn {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: white;
+    border: 1px solid var(--glass-border);
+    padding: 12px 16px;
+    margin: 5px;
+    width: 100%;
+    text-align: left;
+    font-weight: 600;
+    border-radius: 12px;
+    transition: all var(--transition-fast);
+}
+
+.flag-btn:hover:not(:disabled) {
+    background: var(--glass-bg-hover);
+    border-color: var(--glass-border-hover);
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.flag-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.flag-controls {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--glass-border);
+}
+
+.main-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.main-controls button {
+    padding: 15px;
+    font-size: 1.1em;
+    font-weight: 800;
+    text-transform: uppercase;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+}
+
+#startRaceBtn {
+    background: linear-gradient(135deg, var(--accent-green), #059669);
+    color: white;
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25);
+}
+
+#startRaceBtn:hover {
+    box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+    transform: translateY(-2px);
+}
+
+#finishRaceBtn {
+    background: linear-gradient(135deg, var(--accent-red), #dc2626);
+    color: white;
+    box-shadow: 0 4px 20px rgba(239, 68, 68, 0.25);
+}
+
+#finishRaceBtn:hover {
+    box-shadow: 0 8px 30px rgba(239, 68, 68, 0.4);
+    transform: translateY(-2px);
+}
+
+/* ── Race Timer Display ─────────────────────────── */
+.race-time-display {
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 18px;
+    border-radius: 14px;
+    text-align: center;
+    border: 1px solid rgba(56, 189, 248, 0.15);
+    margin: 15px 0;
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+#race-time-remaining {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2rem;
+    color: var(--accent-white);
+    text-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+}
+
+/* ── Scrollbar ──────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+
+::selection {
+    background: rgba(56, 189, 248, 0.3);
+    color: white;
+}

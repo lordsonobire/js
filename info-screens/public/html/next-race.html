@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Next Race</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        .back-link {
+            position: fixed;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            text-decoration: none;
+            padding: 8px 20px;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #f1f5f9;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        .back-link:hover {
+            background: rgba(56, 189, 248, 0.15);
+            border-color: rgba(56, 189, 248, 0.3);
+            box-shadow: 0 4px 20px rgba(56, 189, 248, 0.2);
+            color: #38bdf8;
+        }
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --card-hover: #334155;
+            --accent: #38bdf8;
+            --text-main: #f1f5f9;
+            --text-sub: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Main Race Card */
+        .race-display {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border);
+            padding: 30px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Decorative top bar */
+        .race-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), #6366f1);
+        }
+
+        .race-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .race-title {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .race-title i {
+            color: var(--accent);
+            margin-right: 10px;
+        }
+
+        .status-badge {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            padding: 8px 16px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+        }
+
+        .status-pending {
+            color: #fff;
+            background-color: rgba(245, 158, 11, 0.2);
+            border: 1px solid var(--warning);
+            color: var(--warning);
+        }
+
+        .status-active {
+            background-color: rgba(16, 185, 129, 0.2);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .status-completed {
+            background-color: rgba(56, 189, 248, 0.2);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+
+        .race-flag {
+            margin-top: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Flag Colors */
+        .flag-green,
+        .flag-safe {
+            color: var(--success);
+            text-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+        }
+
+        .flag-yellow,
+        .flag-hazard {
+            color: var(--warning);
+        }
+
+        .flag-red,
+        .flag-danger {
+            color: var(--danger);
+        }
+
+        .flag-checkered,
+        .flag-finish {
+            color: #fff;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Drivers Grid */
+        .drivers-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .driver-card {
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: transform 0.2s ease;
+        }
+
+        .driver-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            background-color: var(--card-hover);
+        }
+
+        .car-number-badge {
+            background: linear-gradient(135deg, var(--card-bg), #0f172a);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.1);
+        }
+
+        .driver-info {
+            flex: 1;
+        }
+
+        .driver-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--text-main);
+        }
+
+        .driver-label {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            margin: 0;
+        }
+
+        /* Paddock Notification */
+        .paddock-alert {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            margin-top: 30px;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            animation: pulse-green 2s infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        @keyframes pulse-green {
+            0% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
+
+        /* No Race State */
+        .no-race {
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            border: 1px dashed var(--border);
+        }
+
+        .no-race h2 {
+            font-family: 'Exo 2', sans-serif;
+            color: var(--text-sub);
+            margin-bottom: 10px;
+        }
+
+        .no-race p {
+            color: var(--text-sub);
+            opacity: 0.7;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="/" class="back-link"><i class="fa-solid fa-arrow-left"></i> Home</a>
+    <div class="container">
+        <div id="race-container">
+            <div class="no-race">
+                <i class="fa-solid fa-calendar-xmark" style="font-size: 3rem; color: #334155; margin-bottom: 20px;"></i>
+                <h2>No Upcoming Race</h2>
+                <p>Check back later for the next scheduled race.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/utils.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let currentRace = null;
+
+        // Request the next race on page load
+        socket.emit('get-next-race', {}, (response) => {
+            if (response.success && response.race) {
+                currentRace = response.race;
+                updateRaceDisplay();
+            }
+        });
+
+        // Listen for race updates
+        socket.on('races-update', (races) => {
+            const nextRace = races.find(race => race.state === 'PENDING');
+
+            if (currentRace) {
+                // Check if our current race is still valid as "Next Race"
+                const updatedCurrent = races.find(r => r.id === currentRace.id);
+
+                if (updatedCurrent) {
+                    if (updatedCurrent.state !== 'PENDING') {
+                        // Current race started/finished. It's no longer "Next".
+                        // Requirement: Next Race screen switches to the subsequent race session
+                        currentRace = nextRace || null;
+                    } else {
+                        // Still pending, just update data (e.g. driver changes)
+                        currentRace = updatedCurrent;
+
+                        // Edge case: if there is a *different* pending race that is "sooner" 
+                        // (e.g. priorities changed), should we switch?
+                        // For now, assume FIFO or standard order. 
+                        // If current race is still pending, keep showing it.
+                    }
+                } else {
+                    // Current race deleted
+                    currentRace = nextRace || null;
+                }
+            } else {
+                // No current race, see if one appeared
+                currentRace = nextRace || null;
+            }
+
+            updateRaceDisplay();
+        });
+
+        // Listen for flag updates
+        socket.on('flag-update', (data) => {
+            if (currentRace && data.raceId === currentRace.id) {
+                currentRace.flag = data.flag;
+                updateRaceDisplay();
+            }
+        });
+
+        function updateRaceDisplay() {
+            const container = document.getElementById('race-container');
+
+            if (!currentRace) {
+                container.innerHTML = `
+            <div class="no-race">
+                <i class="fa-solid fa-calendar-xmark" style="font-size: 3rem; color: #334155; margin-bottom: 20px;"></i>
+                <h2>No Upcoming Race</h2>
+                <p>Check back later for the next scheduled race.</p>
+            </div>
+        `;
+                return;
+            }
+
+            // Check if this race is first in the queue
+            socket.emit('get-races', {}, (response) => {
+                if (response.success) {
+                    const isFirstInQueue = response.races[0]?.id === currentRace.id && currentRace.state === 'PENDING';
+
+                    // Determine status class
+                    let statusClass = '';
+                    let statusIcon = '';
+                    switch (currentRace.state) {
+                        case 'PENDING':
+                            statusClass = 'status-pending';
+                            statusIcon = '<i class="fa-regular fa-clock"></i>';
+                            break;
+                        case 'ACTIVE':
+                            statusClass = 'status-active';
+                            statusIcon = '<i class="fa-solid fa-flag-checkered"></i>';
+                            break;
+                        case 'COMPLETED':
+                            statusClass = 'status-completed';
+                            statusIcon = '<i class="fa-solid fa-trophy"></i>';
+                            break;
+                        default:
+                            statusClass = 'status-pending';
+                    }
+
+                    // Build drivers HTML
+                    let driversHTML = '';
+                    if (currentRace.drivers && currentRace.drivers.length > 0) {
+                        driversHTML = `<div class="drivers-list">`;
+                        currentRace.drivers.forEach(driver => {
+                            driversHTML += `
+                        <div class="driver-card">
+                            <div class="car-number-badge">${escapeHTML(driver.carNumber)}</div>
+                            <div class="driver-info">
+                                <h3 class="driver-name">${escapeHTML(driver.name)}</h3>
+                                <p class="driver-label">Driver</p>
+                            </div>
+                        </div>
+                    `;
+                        });
+                        driversHTML += `</div>`;
+                    } else {
+                        driversHTML = `<p style="color: var(--text-sub); font-style: italic;">No drivers registered for this race yet.</p>`;
+                    }
+
+                    // Determine flag status display
+                    let flagHTML = '';
+                    if (currentRace.flag) {
+                        // Map the backend flag string to our CSS class (lowercase)
+                        const flagClass = `flag-${currentRace.flag.toLowerCase()}`;
+                        flagHTML = `
+                        <div class="race-flag">
+                            <i class="fa-solid fa-flag ${flagClass}"></i> 
+                            <span class="${flagClass}">${currentRace.flag.toUpperCase()} FLAG</span>
+                        </div>`;
+                    }
+
+                    // Add "Proceed to paddock" message if first in queue
+                    const paddockMessage = isFirstInQueue
+                        ? `<div class="paddock-alert">
+                             <i class="fa-solid fa-bullhorn"></i> Drivers, Proceed to Paddock
+                           </div>`
+                        : '';
+
+                    container.innerHTML = `
+                <div class="race-display">
+                    <div class="race-header">
+                        <div>
+                            <h2 class="race-title"><i class="fa-solid fa-flag-checkered"></i> ${escapeHTML(currentRace.name)}</h2>
+                            ${flagHTML}
+                        </div>
+                        <span class="status-badge ${statusClass}">${statusIcon} ${escapeHTML(currentRace.state)}</span>
+                    </div>
+                    
+                    ${driversHTML}
+                    
+                    ${paddockMessage}
+                </div>
+            `;
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

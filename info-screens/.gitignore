@@ -1,0 +1,6 @@
+node_modules/
+.env
+data/races.json
+.DS_Store
+.vercel/
+*.log

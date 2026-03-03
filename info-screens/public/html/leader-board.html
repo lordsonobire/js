@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Race Leaderboard</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@600;800&family=Inter:wght@400;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/leader-board.css">
+    
+    <script src="/js/utils.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/leader-board.js"></script>
+</head>
+<body>
+    <a href="/" class="back-link"><i class="fa-solid fa-arrow-left"></i> Home</a>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <h1 id="race-name">Race Leaderboard</h1>
+            </div>
+            
+            <div class="race-info">
+                <div class="race-time-container">
+                    <span class="label">TIME REMAINING</span>
+                    <div class="time-wrapper">
+                        <span id="race-time-remaining">00:00</span>
+                    </div>
+                </div>
+                <div id="flag-status" class="flag flag-green">GREEN</div>
+            </div>
+        </header>
+
+        <div id="race-end-notification" style="display: none;">
+            <span>🏁 RACE SESSION ENDED 🏁</span>
+        </div>
+        
+        <div id="message" style="display: none;"></div>
+
+        <div class="leaderboard-container">
+            <table class="leaderboard">
+                <thead>
+                    <tr>
+                        <th width="10%">Pos</th>
+                        <th width="15%">Car</th>
+                        <th width="35%">Driver</th>
+                        <th width="15%">Laps</th>
+                        <th width="25%">Fastest Lap</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

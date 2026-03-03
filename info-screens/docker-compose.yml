@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file: .env
+    volumes:
+      - race-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  race-data:

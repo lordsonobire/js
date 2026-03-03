@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  info-screens:
+    build: ./info-screens
+    ports:
+      - "3001:3000"
+    env_file: ./info-screens/.env
+    volumes:
+      - info-screens-data:/app/data
+    restart: unless-stopped
+
+  neon-arena:
+    build: ./multi-player/neon-arena
+    ports:
+      - "3004:3000"
+    environment:
+      PORT: 3000
+      ALLOWED_ORIGINS: http://localhost:3004
+    restart: unless-stopped
+
+  frontend-framework:
+    build: ./frontend-framework
+    ports:
+      - "3005:8080"
+    restart: unless-stopped
+
+# match-me has its own docker-compose in web/match-me/
+
+volumes:
+  info-screens-data:

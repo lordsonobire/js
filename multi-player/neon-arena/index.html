@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Arena: Dom Dash</title>
+    <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+    <div id="app">
+        <div id="background-layer"></div>
+        <!-- Join Screen -->
+        <div id="join-screen" class="screen">
+            <h1>NEON ARENA</h1>
+            <p class="subtitle">Collect orbs. Pulse rivals. Dominate.</p>
+            <div class="join-box">
+                <input type="text" id="player-name" placeholder="Enter your name" maxlength="15">
+                <button id="join-btn">JOIN MATCH</button>
+            </div>
+            <p id="error-msg" class="error"></p>
+            <div class="controls-hint">
+                <span><kbd>WASD</kbd> Move</span>
+                <span><kbd>SPACE</kbd> Pulse</span>
+                <span><kbd>ESC</kbd> Pause</span>
+            </div>
+        </div>
+
+        <!-- Lobby Screen -->
+        <div id="lobby-screen" class="screen hidden">
+            <h1>LOBBY</h1>
+            <div id="player-list"></div>
+            <div class="lobby-controls">
+                <button id="ready-btn">READY</button>
+                <button id="start-btn" class="hidden">START GAME</button>
+            </div>
+            <p class="lobby-note">Waiting for 2-4 players...</p>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen hidden">
+            <div id="game-header">
+                <div id="game-header-center">
+                    <div id="timer">02:00</div>
+                    <div id="pulse-cooldown"><div id="pulse-cooldown-fill"></div></div>
+                    <button id="pause-btn">PAUSE</button>
+                </div>
+                <div id="scoreboard"></div>
+            </div>
+            <div id="game-arena">
+                <!-- Players and Orbs will be rendered here as DOM elements -->
+            </div>
+        </div>
+
+        <!-- Pause/Menu Overlay -->
+        <div id="menu-overlay" class="overlay hidden">
+            <div class="menu-content">
+                <h2 id="menu-title">PAUSED</h2>
+                <p id="menu-info"></p>
+                <button id="resume-btn">RESUME</button>
+                <button id="quit-btn">QUIT</button>
+            </div>
+        </div>
+
+        <!-- Winner Screen -->
+        <div id="winner-screen" class="overlay hidden">
+            <div class="menu-content">
+                <h2>GAME OVER</h2>
+                <div id="winner-info"></div>
+                <button id="play-again-btn">PLAY AGAIN</button>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>

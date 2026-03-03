@@ -1,0 +1,13 @@
+{
+  "name": "frontend-framework",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "serve": "npx serve . -l 8080"
+  },
+  "devDependencies": {
+    "vitest": "^3.0.0",
+    "jsdom": "^25.0.0"
+  }
+}

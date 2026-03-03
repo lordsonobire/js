@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Race Control Center</title>
+
+    <link rel="stylesheet" href="../css/style.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="/socket.io/socket.io.js"></script>
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #080818;
+            background-image:
+                radial-gradient(ellipse 80% 60% at 20% 10%, rgba(56, 189, 248, 0.1) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 80% 90%, rgba(168, 85, 247, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 50% 50%, rgba(16, 185, 129, 0.04) 0%, transparent 60%);
+            color: rgba(255, 255, 255, 0.92);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(circle 600px at 30% 20%, rgba(56, 189, 248, 0.05) 0%, transparent 100%),
+                radial-gradient(circle 500px at 70% 80%, rgba(168, 85, 247, 0.04) 0%, transparent 100%);
+            animation: ambientShift 20s ease-in-out infinite alternate;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes ambientShift {
+            0%   { opacity: 1; transform: scale(1); }
+            50%  { opacity: 0.6; transform: scale(1.05); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        h1 {
+            position: relative;
+            z-index: 1;
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 2.5rem;
+            letter-spacing: 3px;
+            margin-bottom: 2.5rem;
+            text-align: center;
+            background: linear-gradient(135deg, #fff, #38bdf8, #a855f7);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientText 6s ease infinite;
+        }
+
+        @keyframes gradientText {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .nav-container {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+            perspective: 1000px;
+        }
+
+        .nav-link {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 1.5rem;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.92);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 140px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: linear-gradient(180deg, #38bdf8, #a855f7);
+            opacity: 0.4;
+            transition: all 0.35s ease;
+        }
+
+        .nav-link:hover {
+            transform: translateY(-6px) scale(1.02);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4), 0 0 30px rgba(56, 189, 248, 0.1);
+            border-color: rgba(56, 189, 248, 0.2);
+        }
+
+        .nav-link:hover::before {
+            opacity: 1;
+            width: 4px;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+        }
+
+        .icon-wrapper {
+            font-size: 1.8rem;
+            color: #38bdf8;
+            margin-bottom: 1rem;
+            width: fit-content;
+            padding: 12px;
+            background: rgba(56, 189, 248, 0.08);
+            border: 1px solid rgba(56, 189, 248, 0.1);
+            border-radius: 14px;
+            transition: all 0.35s ease;
+        }
+
+        .nav-link:hover .icon-wrapper {
+            background: rgba(56, 189, 248, 0.15);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.15);
+        }
+
+        .link-content strong {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1.2rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link span {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.45);
+            line-height: 1.5;
+            font-weight: 400;
+            display: block;
+        }
+
+        @media (min-width: 768px) {
+            .nav-link:last-child:nth-child(odd) {
+                grid-column: span 2;
+            }
+            .nav-container:has(> :last-child:nth-child(3n+1)) > :last-child {
+                 grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8rem; }
+            .nav-container { padding: 0 10px; }
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 3px; }
+
+        ::selection {
+            background: rgba(56, 189, 248, 0.3);
+            color: white;
+        }
+    </style>
+</head>
+
+<script>
+    const socket = io();
+</script>
+
+<body>
+    <h1><i class="fa-solid fa-flag-checkered"></i> Race Control Center</h1>
+    
+    <nav class="nav-container">
+
+        <a href="/front-desk" class="nav-link">
+            <div class="icon-wrapper"><i class="fa-solid fa-id-card"></i></div>
+            <div class="link-content">
+                <strong>Front Desk</strong>
+                <span>Manage races and drivers registration</span>
+            </div>
+        </a>
+
+        <a href="/leader-board" class="nav-link">
+            <div class="icon-wrapper"><i class="fa-solid fa-trophy"></i></div>
+            <div class="link-content">
+                <strong>Leader Board</strong>
+                <span>View live race standings and results</span>
+            </div>
+        </a>
+
+        <a href="/race-control" class="nav-link">
+            <div class="icon-wrapper"><i class="fa-solid fa-gamepad"></i></div>
+            <div class="link-content">
+                <strong>Race Control</strong>
+                <span>Manage race status and safety flags</span>
+            </div>
+        </a>
+
+        <a href="/lap-line-tracker" class="nav-link">
+            <div class="icon-wrapper"><i class="fa-solid fa-stopwatch"></i></div>
+            <div class="link-content">
+                <strong>Lap-Line Tracker</strong>
+                <span>Record lap completions and timing</span>
+            </div>
+        </a>
+
+        <a href="/next-race" class="nav-link">
+            <div class="icon-wrapper"><i class="fa-solid fa-calendar-days"></i></div>
+            <div class="link-content">
+                <strong>Next Race</strong>
+                <span>View upcoming race information</span>
+            </div>
+        </a>
+
+        <a href="/flag" class="nav-link">
+            <div class="icon-wrapper"><i class="fa-solid fa-flag"></i></div>
+            <div class="link-content">
+                <strong>Race Flags</strong>
+                <span>Monitor current race flag status</span>
+            </div>
+        </a>
+
+        <a href="/race-countdown" class="nav-link" style="border-color: rgba(239, 68, 68, 0.15);">
+            <div class="icon-wrapper" style="color: #ef4444; background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.1);">
+                <i class="fa-solid fa-clock"></i>
+            </div>
+            <div class="link-content">
+                <strong>Race Countdown</strong>
+                <span>View time remaining in current race</span>
+            </div>
+        </a>
+
+    </nav>
+</body>
+</html>

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Race Countdown</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="/socket.io/socket.io.js"></script>
+    
+    <style>
+        .back-link {
+            position: fixed;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            text-decoration: none;
+            padding: 8px 20px;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.5);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        .back-link:hover {
+            background: rgba(56, 189, 248, 0.15);
+            border-color: rgba(56, 189, 248, 0.3);
+            box-shadow: 0 4px 20px rgba(56, 189, 248, 0.2);
+            color: #38bdf8;
+        }
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.6);
+            --text-main: #f8fafc;
+            --timer-default: #38bdf8; /* Electric Blue */
+            --timer-finished: #f59e0b; /* Amber */
+            --glow-strength: 0 0 40px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            /* Subtle radial gradient for depth */
+            background-image: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            font-family: 'Exo 2', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-main);
+            overflow: hidden;
+        }
+
+        /* Main Card */
+        .countdown-container {
+            text-align: center;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 4rem 2rem;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 90%;
+            max-width: 800px;
+            position: relative;
+        }
+
+        /* Header / Race Name */
+        .race-name {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            line-height: 1.2;
+        }
+
+        /* The Digital Timer */
+        .timer {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12rem;
+            font-weight: 700;
+            /* Default color (Active) */
+            color: var(--timer-default);
+            line-height: 1;
+            margin: 2rem 0;
+            
+            /* Glow uses currentColor so it changes when JS changes the text color */
+            text-shadow: var(--glow-strength) currentColor;
+            
+            /* Slight tabular spacing to prevent jitter */
+            font-variant-numeric: tabular-nums;
+            
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        /* No Race State */
+        .no-race {
+            font-size: 2.5rem;
+            color: #94a3b8; /* Muted Slate */
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .no-race i {
+            font-size: 4rem;
+            opacity: 0.5;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.02); opacity: 0.9; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .countdown-container {
+                padding: 2rem 1rem;
+                width: 95%;
+            }
+            
+            .timer {
+                font-size: 18vw; /* Viewport width based sizing */
+            }
+            
+            .race-name {
+                font-size: 1.8rem;
+            }
+            
+            .no-race {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-link"><i class="fa-solid fa-arrow-left"></i> Home</a>
+    <div class="countdown-container">
+        <div class="race-name" id="raceName"></div>
+        <div class="timer" id="timer"></div>
+        
+        <div class="no-race" id="noRace" style="display:none">
+            <i class="fa-solid fa-stopwatch"></i>
+            <div>NO ACTIVE RACE SESSION</div>
+        </div>
+    </div>
+
+<script>
+    const socket = io();
+    let currentRaceId = null;
+
+    function formatTime(seconds) {
+        const min = Math.floor(seconds / 60);
+        const sec = seconds % 60;
+        return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+    }
+
+    function loadCurrentRace() {
+        socket.emit('get-all-races', {}, (response) => {
+            if (!response.success || !response.races?.length) {
+                showNoRace();
+                return;
+            }
+
+            const activeRace = response.races.find(r => r.state === 'STARTED');
+            if (activeRace) {
+                currentRaceId = activeRace.id;
+                updateDisplay(activeRace);
+            } else {
+                showNoRace();
+            }
+        });
+    }
+
+    function updateDisplay(race) {
+        const timerEl = document.getElementById('timer');
+        const raceNameEl = document.getElementById('raceName');
+        const noRaceEl = document.getElementById('noRace');
+
+        timerEl.style.display = 'block';
+        raceNameEl.style.display = 'block';
+        noRaceEl.style.display = 'none';
+
+        raceNameEl.textContent = race.name;
+
+        const timeInSeconds = Math.max(0,
+            race.remainingTime >= 1000
+                ? Math.floor(race.remainingTime / 1000)
+                : race.remainingTime
+        );
+
+        timerEl.textContent = formatTime(timeInSeconds);
+
+        // Reset color to default blue if time is remaining
+        if (timeInSeconds > 0) {
+            timerEl.style.color = ''; // Removes inline style, reverts to CSS default
+        }
+
+        if (timeInSeconds === 0) {
+            timerEl.textContent = 'FINISHED';
+            timerEl.style.color = '#f39c12'; // This will automatically update the glow shadow too
+        }
+    }
+
+    function showNoRace() {
+        document.getElementById('timer').style.display = 'none';
+        document.getElementById('raceName').style.display = 'none';
+        document.getElementById('noRace').style.display = 'flex'; // Changed from block to flex for centering icon
+    }
+
+    // Socket listeners
+    socket.on('race-started', (data) => {
+        loadCurrentRace();
+    });
+
+    socket.on('race-time-update', (data) => {
+        if (data.raceId === currentRaceId) {
+            const timeInSeconds = Math.max(0,
+                data.remainingTime >= 1000
+                    ? Math.floor(data.remainingTime / 1000)
+                    : data.remainingTime
+            );
+
+            const timerEl = document.getElementById('timer');
+            timerEl.textContent = formatTime(timeInSeconds);
+
+            if (timeInSeconds === 0) {
+                timerEl.textContent = 'FINISHED';
+                timerEl.style.color = '#f39c12';
+            }
+        }
+    });
+
+    socket.on('race-time-finished', (data) => {
+        if (data.raceId === currentRaceId) {
+            const timerEl = document.getElementById('timer');
+            timerEl.textContent = 'FINISHED';
+            timerEl.style.color = '#f39c12';
+        }
+    });
+
+    // Initialize
+    loadCurrentRace();
+</script>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Race Control</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;800&family=JetBrains+Mono:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+    <h1><i class="fa-solid fa-tower-broadcast"></i> Race Control</h1>
+
+    <a href="/" class="back-link"><i class="fa-solid fa-arrow-left"></i> Home</a>
+    <section>
+        <h2>Race Control Panel</h2>
+
+        <p id="noRacesMsg" style="display: block;">Searching for an active or upcoming race...</p>
+
+        <div id="race-control-card" style="display: none;">
+            <input type="hidden" id="currentRaceId" value="">
+
+            <h3>Current Race: <span id="raceName"></span></h3>
+            <p class="race-info">Status: <span id="raceStatus"></span></p>
+            <div class="race-time-display" style="display:none;">
+                <p>Time Remaining: <span id="race-time-remaining">00:00</span></p>
+            </div>
+            <p class="race-info">Current Flag: <span id="raceFlag"></span></p>
+
+            <div class="main-controls">
+                <button id="startRaceBtn" disabled>Start Race</button>
+                <button id="finishRaceBtn" disabled>Finish Race</button>
+            </div>
+
+            <div class="flag-controls">
+                <h4>Set Flag Status</h4>
+                <button class="flag-btn" data-flag="green">Green (Safe)</button>
+                <button class="flag-btn" data-flag="yellow">Yellow (Hazard)</button>
+                <button class="flag-btn" data-flag="red">Red (Danger)</button>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            async function verifyAccess() {
+                const accessCode = prompt('Enter access code for Race Control:');
+                if (!accessCode) { alert('Access code required'); window.location.href = '/'; return false; }
+                try {
+                    const res = await fetch('/api/verify-access', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ page: 'race-control', accessCode })
+                    });
+                    const result = await res.json();
+                    if (result.success) return true;
+                    alert(result.message || 'Invalid access code');
+                    return await verifyAccess();
+                } catch (err) {
+                    console.error(err);
+                    alert('Error verifying access'); window.location.href = '/';
+                    return false;
+                }
+            }
+
+            if (await verifyAccess()) initializeRaceControl();
+        });
+
+        function initializeRaceControl() {
+            const socket = io();
+            let currentRaceId = null;
+
+            function loadCurrentRace() {
+                socket.emit('get-races', {}, (response) => {
+                    if (!response.success || !response.races?.length) {
+                        document.getElementById('noRacesMsg').style.display = 'block';
+                        document.getElementById('race-control-card').style.display = 'none';
+                        return;
+                    }
+
+                    const current = response.races.find(r => r.state === 'STARTED' || r.state === 'ACTIVE')
+                        || response.races.find(r => r.state === 'PENDING');
+
+                    if (current) {
+                        document.getElementById('noRacesMsg').style.display = 'none';
+                        document.getElementById('race-control-card').style.display = 'block';
+                        currentRaceId = current.id;
+                        updateControls(current);
+                        if ((current.state === 'STARTED' || current.state === 'ACTIVE') && current.remainingTime !== undefined) {
+                            updateRaceTime(current.remainingTime);
+                        }
+                    } else {
+                        document.getElementById('noRacesMsg').style.display = 'block';
+                        document.getElementById('race-control-card').style.display = 'none';
+                    }
+                });
+            }
+
+            function updateControls(race) {
+                document.getElementById('raceName').textContent = race.name;
+                document.getElementById('raceStatus').textContent = race.state;
+                document.getElementById('raceFlag').textContent = race.flag || 'None';
+                document.getElementById('currentRaceId').value = race.id;
+
+                const startBtn = document.getElementById('startRaceBtn');
+                const finishBtn = document.getElementById('finishRaceBtn');
+                const flagBtns = document.querySelectorAll('.flag-btn');
+
+                startBtn.disabled = finishBtn.disabled = false;
+                flagBtns.forEach(btn => btn.disabled = false);
+
+                if (race.state === 'PENDING' || race.state === 'SAFE_TO_START') {
+                    startBtn.disabled = false;
+                    finishBtn.disabled = true;
+                    document.querySelector('.race-time-display').style.display = 'none';
+                } else if (race.state === 'STARTED' || race.state === 'ACTIVE') {
+                    startBtn.disabled = true;
+                    finishBtn.disabled = false;
+                    document.querySelector('.race-time-display').style.display = 'block';
+                } else if (race.state === 'FINISHED') {
+                    startBtn.disabled = finishBtn.disabled = true;
+                    flagBtns.forEach(btn => btn.disabled = true);
+                    document.querySelector('.race-time-display').style.display = 'block';
+                }
+
+                flagBtns.forEach(btn => {
+                    btn.classList.toggle('active-state', btn.getAttribute('data-flag') === race.flag);
+                    if (race.state === 'FINISHED') btn.disabled = true;
+                });
+            }
+
+            // --- Button handlers ---
+            document.getElementById('startRaceBtn').addEventListener('click', () => {
+                if (!currentRaceId) return;
+                socket.emit('start-race', { raceId: currentRaceId }, (res) => {
+                    if (!res.success) alert('Failed to start race: ' + res.message);
+                });
+            });
+
+            document.getElementById('finishRaceBtn').addEventListener('click', () => {
+                if (!currentRaceId) return;
+                if (confirm('Finish race and show checkered flag?')) {
+                    socket.emit('end-race', { raceId: currentRaceId }, (res) => {
+                        if (!res.success) alert('Failed to finish race: ' + res.message);
+                    });
+                }
+            });
+
+            document.querySelectorAll('.flag-btn').forEach(btn => {
+                btn.addEventListener('click', e => {
+                    if (!currentRaceId || e.target.disabled) return;
+                    const flag = e.target.getAttribute('data-flag');
+                    socket.emit('update-flag', { raceId: currentRaceId, flag }, res => {
+                        if (!res.success) alert('Failed to set flag: ' + res.message);
+                    });
+                });
+            });
+
+            // --- Socket events ---
+            socket.on('races-update', races => {
+                if (!currentRaceId) return loadCurrentRace();
+
+                const race = races.find(r => r.id === currentRaceId);
+
+                // If the race is finished, reload to try and find the next race
+                if (race && race.state === 'FINISHED') {
+                    // Slight delay to allow server to process everything if needed, 
+                    // though usually calling loadCurrentRace immediately is fine.
+                    // We also want to update the display momentarily to show it's finished?
+                    // The user wants the next race to appear.
+                    // Let's call loadCurrentRace which prioritizes STARTED > PENDING > FINISHED.
+                    // If we just loop back, it might pick the same finished race if it's the only one.
+                    // loadCurrentRace has logic: STARTED || PENDING || FINISHED.
+                    // If we have Race 1 (Finished) and Race 2 (Pending).
+                    // loadCurrentRace finds Pending (Race 2) BEFORE Finished (Race 1)?
+                    // No.
+                    // Code: 
+                    // const current = response.races.find(r => r.state === 'STARTED' || r.state === 'ACTIVE')
+                    //    || response.races.find(r => r.state === 'PENDING')
+                    //    || response.races.find(r => r.state === 'FINISHED');
+                    // Yes! It finds PENDING before FINISHED.
+                    // So simply calling loadCurrentRace() works perfectly.
+                    loadCurrentRace();
+                } else if (race) {
+                    updateControls(race);
+                } else {
+                    loadCurrentRace();
+                }
+            });
+
+            socket.on('race-time-update', data => {
+                if (data.raceId === currentRaceId) updateRaceTime(data.remainingTime);
+            });
+
+            socket.on('race-time-finished', data => {
+                if (data.raceId === currentRaceId) loadCurrentRace();
+            });
+
+            // Initial load
+            loadCurrentRace();
+
+            function updateRaceTime(ms) {
+                const raceTimeEl = document.getElementById('race-time-remaining');
+                const timeDisplay = document.querySelector('.race-time-display');
+                let seconds = Math.floor(ms / 1000);
+                const mins = Math.floor(seconds / 60);
+                seconds = seconds % 60;
+                raceTimeEl.textContent = `${mins.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                timeDisplay.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,657 @@
+/* ═══════════════════════════════════════════════════
+   NEON ARENA — Synthwave Glass Theme
+   ═══════════════════════════════════════════════════ */
+
+:root {
+    --bg-color: #0d0221;
+    --neon-blue: hsl(190, 100%, 50%);
+    --neon-pink: hsl(320, 100%, 60%);
+    --neon-purple: hsl(280, 100%, 50%);
+    --neon-yellow: hsl(45, 100%, 50%);
+    --neon-green: hsl(140, 100%, 50%);
+    --emerald-glow: rgba(255, 0, 255, 0.15);
+    --text-color: #fff;
+    --font-main: 'Outfit', 'Inter', sans-serif;
+
+    /* Glass tokens */
+    --glass-bg: rgba(255, 255, 255, 0.03);
+    --glass-bg-hover: rgba(255, 255, 255, 0.07);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-blur: 20px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-color);
+    background-image:
+        radial-gradient(ellipse 60% 50% at 20% 20%, rgba(255, 0, 255, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 80% 80%, rgba(0, 255, 242, 0.04) 0%, transparent 60%);
+    color: var(--text-color);
+    font-family: var(--font-main);
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#app {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background: var(--bg-color);
+    perspective: 1000px;
+}
+
+#background-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+    background: url('/synthwave-bg.jpg') no-repeat center center;
+    background-size: cover;
+}
+
+#background-layer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(13, 2, 33, 0.2), transparent, rgba(13, 2, 33, 0.5));
+    pointer-events: none;
+}
+
+.bg-plane {
+    position: absolute;
+    width: 40px;
+    height: 30px;
+    background: linear-gradient(45deg, var(--neon-green), var(--neon-blue));
+    clip-path: polygon(0% 50%, 40% 0%, 100% 50%, 40% 100%);
+    box-shadow: 0 0 15px var(--neon-green);
+    filter: blur(1px);
+    opacity: 0.6;
+    animation: flight 10s linear infinite;
+    transform-style: preserve-3d;
+}
+
+.bg-plane-glow {
+    position: absolute;
+    inset: -20px;
+    background: radial-gradient(circle, var(--emerald-glow), transparent 70%);
+}
+
+@keyframes flight {
+    0% {
+        transform: translateZ(-500px) rotateY(0deg) translateX(-100vw);
+        opacity: 0;
+    }
+    10% { opacity: 0.6; }
+    90% { opacity: 0.6; }
+    100% {
+        transform: translateZ(500px) rotateY(15deg) translateX(100vw);
+        opacity: 0;
+    }
+}
+
+.screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.3s ease;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ── Title ──────────────────────────────────────── */
+h1 {
+    font-size: 6rem;
+    margin-bottom: 2rem;
+    color: #fff;
+    text-shadow:
+        0 0 10px var(--neon-pink),
+        0 0 20px var(--neon-purple),
+        0 0 40px var(--neon-pink);
+    letter-spacing: 1.2rem;
+    animation: neon-pulse 3.5s ease-in-out infinite alternate;
+    font-weight: 900;
+}
+
+@keyframes neon-pulse {
+    from {
+        text-shadow: 0 0 10px var(--neon-pink), 0 0 20px var(--neon-purple);
+        transform: scale(1);
+    }
+    to {
+        text-shadow: 0 0 20px var(--neon-pink), 0 0 40px var(--neon-purple), 0 0 60px var(--neon-pink);
+        transform: scale(1.02);
+    }
+}
+
+.subtitle {
+    font-size: 1.3rem;
+    color: var(--neon-blue);
+    text-shadow: 0 0 8px var(--neon-blue);
+    margin-bottom: 2rem;
+    letter-spacing: 0.3rem;
+    text-transform: uppercase;
+}
+
+.controls-hint {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2rem;
+    opacity: 0.6;
+    font-size: 0.9rem;
+}
+
+.controls-hint kbd {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    margin-right: 4px;
+}
+
+/* ── Glass Join Box ─────────────────────────────── */
+.join-box {
+    display: flex;
+    gap: 1rem;
+}
+
+input {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid rgba(0, 255, 242, 0.25);
+    color: #fff;
+    padding: 1rem;
+    font-size: 1.2rem;
+    border-radius: 12px;
+    outline: none;
+    box-shadow: inset 0 0 10px rgba(0, 255, 242, 0.05), 0 0 15px rgba(0, 255, 242, 0.05);
+    transition: all 0.3s ease;
+}
+
+input:focus {
+    border-color: var(--neon-blue);
+    box-shadow: inset 0 0 10px rgba(0, 255, 242, 0.1), 0 0 25px rgba(0, 255, 242, 0.15);
+}
+
+/* ── Glass Buttons ──────────────────────────────── */
+button {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid rgba(255, 0, 255, 0.3);
+    color: #fff;
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    cursor: pointer;
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-transform: uppercase;
+    font-weight: bold;
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+button::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.5s ease;
+}
+
+button:hover::after {
+    transform: translateX(100%);
+}
+
+button:hover {
+    background: rgba(255, 0, 255, 0.15);
+    border-color: var(--neon-pink);
+    box-shadow: 0 0 30px rgba(255, 0, 255, 0.2), inset 0 0 15px rgba(255, 0, 255, 0.05);
+    transform: translateY(-2px);
+}
+
+.error {
+    color: var(--neon-pink);
+    margin-top: 1rem;
+    height: 1.2rem;
+}
+
+/* ── Glass Player Cards ─────────────────────────── */
+#player-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.player-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    padding: 1.5rem;
+    border-radius: 16px;
+    text-align: center;
+    min-width: 150px;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.player-card .player-card-emoji {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.player-card.ready {
+    background: rgba(0, 255, 0, 0.06);
+    border-color: rgba(0, 255, 0, 0.2);
+    box-shadow: 0 0 25px rgba(0, 255, 0, 0.1), inset 0 0 15px rgba(0, 255, 0, 0.03);
+}
+
+/* ── Game Header ────────────────────────────────── */
+#game-header {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    z-index: 10;
+}
+
+#game-header-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 0;
+}
+
+#game-header-center #pause-btn {
+    font-size: 0.8rem;
+    padding: 4px 12px;
+    border-radius: 9999px;
+}
+
+#timer {
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-shadow: 0 0 10px var(--neon-green);
+    transition: color 0.3s, text-shadow 0.3s;
+}
+
+#timer.urgent {
+    color: var(--neon-pink);
+    text-shadow: 0 0 15px var(--neon-pink), 0 0 30px var(--neon-pink);
+    animation: timer-flash 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes timer-flash {
+    from { opacity: 1; }
+    to { opacity: 0.6; }
+}
+
+/* ── Cooldown Bar ───────────────────────────────── */
+#pulse-cooldown {
+    width: 80px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+#pulse-cooldown-fill {
+    width: 100%;
+    height: 100%;
+    background: var(--neon-blue);
+    box-shadow: 0 0 8px var(--neon-blue);
+    border-radius: 2px;
+    transition: width 0.1s linear;
+}
+
+/* ── Glass Scoreboard ───────────────────────────── */
+#scoreboard {
+    position: absolute;
+    right: 0;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: right;
+}
+
+.score-item {
+    font-size: 1.2rem;
+    padding: 6px 14px;
+    border-radius: 10px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+}
+
+/* ── Game Arena ──────────────────────────────────── */
+#game-arena {
+    width: 1200px;
+    height: 800px;
+    border: 2px solid rgba(255, 0, 255, 0.4);
+    position: relative;
+    background:
+        linear-gradient(rgba(255, 0, 255, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 0, 255, 0.06) 1px, transparent 1px);
+    background-size: 60px 60px, 60px 60px;
+    background-color: rgba(13, 2, 33, 0.5);
+    backdrop-filter: blur(12px) brightness(1.1);
+    -webkit-backdrop-filter: blur(12px) brightness(1.1);
+    box-shadow:
+        0 0 60px rgba(0, 0, 0, 0.6),
+        0 0 30px rgba(255, 0, 255, 0.1),
+        inset 0 0 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    animation: grid-shift 25s linear infinite;
+    border-radius: 20px;
+}
+
+@keyframes grid-shift {
+    from { background-position: 0 0, 0 0; }
+    to { background-position: 400px 400px, 400px 400px; }
+}
+
+/* ── Players ────────────────────────────────────── */
+.game-player {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    will-change: transform;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.player-emoji {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+}
+
+.player-name-tag {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.9rem;
+    font-weight: bold;
+    white-space: nowrap;
+    text-shadow: 0 0 5px #000;
+    pointer-events: none;
+}
+
+/* ── Orbs ───────────────────────────────────────── */
+.game-orb {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: var(--neon-yellow);
+    box-shadow: 0 0 10px var(--neon-yellow), 0 0 20px var(--neon-yellow), 0 0 30px var(--neon-yellow);
+    z-index: 1;
+    will-change: transform;
+    animation: orb-float 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes orb-float {
+    from { filter: brightness(1) drop-shadow(0 0 5px var(--neon-yellow)); }
+    to { filter: brightness(1.5) drop-shadow(0 0 15px var(--neon-yellow)); }
+}
+
+.game-orb.speed {
+    background: var(--neon-pink);
+    box-shadow: 0 0 15px var(--neon-pink), 0 0 30px var(--neon-pink), 0 0 45px var(--neon-pink);
+    border: 2px solid #fff;
+    width: 25px;
+    height: 25px;
+    animation: orb-pulse-speed 2s ease-in-out infinite alternate;
+}
+
+@keyframes orb-pulse-speed {
+    from { filter: brightness(1) drop-shadow(0 0 10px var(--neon-pink)); }
+    to { filter: brightness(1.5) drop-shadow(0 0 25px var(--neon-pink)); }
+}
+
+.pulse-effect {
+    position: absolute;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: pulse-bloom 0.5s ease-out forwards;
+}
+
+@keyframes pulse-bloom {
+    from { width: 0; height: 0; opacity: 1; transform: translate(-50%, -50%); }
+    to { width: 300px; height: 300px; opacity: 0; transform: translate(-50%, -50%); }
+}
+
+/* ── Glass Overlay/Menu ─────────────────────────── */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(13, 2, 33, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.menu-content {
+    background: var(--glass-bg);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid var(--glass-border);
+    padding: 3rem;
+    border-radius: 24px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 40px rgba(0, 255, 242, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.menu-content h2 {
+    font-size: 3rem;
+    text-shadow: 0 0 10px var(--neon-blue);
+}
+
+/* ── Glass Notification Toasts ──────────────────── */
+#notification-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.notification-toast {
+    background: rgba(13, 2, 33, 0.7);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid rgba(0, 255, 242, 0.2);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 14px;
+    font-family: var(--font-main);
+    font-size: 1rem;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 0 15px rgba(0, 255, 242, 0.1);
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.3s, transform 0.3s;
+    text-shadow: 0 0 5px #00fff2;
+}
+
+.notification-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ── Warp Tunnel Effects ────────────────────────── */
+.star-streak {
+    position: absolute;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #fff, transparent);
+    width: 150px;
+    opacity: 0.8;
+    animation: warp-travel linear infinite;
+    pointer-events: none;
+    filter: blur(1px);
+}
+
+@keyframes warp-travel {
+    0% { transform: scaleX(0.5) translateX(-100vw); opacity: 0; }
+    30% { opacity: 1; }
+    70% { opacity: 1; }
+    100% { transform: scaleX(3) translateX(100vw); opacity: 0; }
+}
+
+.nebula-cloud {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, var(--emerald-glow) 0%, transparent 70%);
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.3;
+    animation: nebula-drift 40s ease-in-out infinite alternate;
+    pointer-events: none;
+}
+
+@keyframes nebula-drift {
+    from { transform: translate(-10%, -10%) scale(1); }
+    to { transform: translate(110%, 110%) scale(1.5); }
+}
+
+/* ── Glass Countdown Overlay ────────────────────── */
+#countdown-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(13, 2, 33, 0.7);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 200;
+    pointer-events: none;
+}
+
+#countdown-overlay .countdown-text {
+    font-size: 8rem;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 0 30px var(--neon-pink), 0 0 60px var(--neon-purple);
+    animation: countdown-pop 0.8s ease-out;
+}
+
+@keyframes countdown-pop {
+    0% { transform: scale(2); opacity: 0; }
+    50% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0.8); opacity: 0.5; }
+}
+
+/* ── Glass Final Standings ──────────────────────── */
+.final-standings {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    width: 100%;
+    max-width: 300px;
+}
+
+.final-standings .standing-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.final-standings .standing-row:first-child {
+    background: rgba(255, 215, 0, 0.08);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.08);
+}
+
+.final-standings .standing-rank {
+    opacity: 0.6;
+    min-width: 30px;
+}
+
+.final-standings .standing-name {
+    flex: 1;
+}
+
+.final-standings .standing-score {
+    font-weight: bold;
+    text-shadow: 0 0 5px var(--neon-blue);
+}
+
+/* ── Lobby Controls ─────────────────────────────── */
+.lobby-controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.lobby-note {
+    opacity: 0.6;
+    font-size: 0.95rem;
+}
+
+/* ── Scrollbar ──────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 3px; }
+
+::selection {
+    background: rgba(255, 0, 255, 0.3);
+    color: white;
+}

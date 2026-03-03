@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:14-alpine
+    container_name: match_me_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: match_me
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./server-go
+    container_name: match_me_backend
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgres://postgres:password@db:5432/match_me?sslmode=disable
+      - PORT=3000
+      - JWT_SECRET=${JWT_SECRET:-change_me_to_a_random_secret}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3001,http://localhost:5173}
+    depends_on:
+      - db
+    restart: on-failure
+
+  frontend:
+    build: ./client
+    container_name: match_me_frontend
+    ports:
+      - "3001:5173"
+      # Mapping container 3000 (React default) to host 3001 to avoid conflict if backend uses 3000?
+      # Wait, backend uses 3000. React default is 3000.
+      # If both are 3000, we have a conflict on HOST.
+      # Let's map Backend to 3000 (API) and Frontend to 3001.
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    depends_on:
+      - backend
+    stdin_open: true # For interactive mode (React)
+    tty: true
+
+volumes:
+  postgres_data:

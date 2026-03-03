@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+uploads/
+.DS_Store
+postgres_data/
+*.log
+server-go/match-me-server

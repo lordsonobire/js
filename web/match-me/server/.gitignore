@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+dist/
+
+# Environment variables
+.env
+
+# Database Artifacts (Local DBs)
+postgres_data/
+postgres_db*/
+*.log
+postgres.log
+local_postgres.log
+
+# Uploads
+uploads/
+
+# OS Specific
+.DS_Store
+Thumbs.db
