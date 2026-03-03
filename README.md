@@ -10,7 +10,6 @@ A collection of full-stack and utility projects built during my studies.
 | [info-screens](./info-screens/) | Racetrack management system with 7 live display screens | Node.js, Express, Socket.IO |
 | [neon-arena](./multi-player/neon-arena/) | Multiplayer browser game with orb collection and abilities | Node.js, Socket.IO, Vite |
 | [frontend-framework](./frontend-framework/) | Custom SPA framework from scratch — virtual DOM, state, routing | Vanilla JS |
-| [ancient-history](./ancient-history/) | Date classification utility | Node.js |
 
 Each project has its own README with setup instructions. Most can be run with `docker-compose up --build` from their directory.
 
